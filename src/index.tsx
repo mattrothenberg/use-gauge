@@ -1,5 +1,6 @@
-import { useCallback } from 'react';
-import { map, makeTickMarks, polarToCartesian } from './lib';
+import { useCallback, useMemo } from 'react';
+import { scaleLinear } from '@visx/scale';
+import { makeTickMarks, polarToCartesian } from './lib';
 
 interface UseGaugeParams {
   // value: number;
@@ -8,6 +9,7 @@ interface UseGaugeParams {
   startAngle: number;
   endAngle: number;
   numTicks: number;
+  domain: [number, number];
 }
 
 interface GetTickPropsParams {
@@ -21,8 +23,9 @@ interface GetLabelPropsParams {
 }
 
 export function useGauge(params: UseGaugeParams) {
-  const { startAngle, endAngle, numTicks, size, padding } = params;
+  const { startAngle, endAngle, numTicks, size, padding, domain } = params;
   const radius = size / 2 - padding;
+  const [minValue, maxValue] = domain;
 
   const tickMarkAngles = makeTickMarks(startAngle, endAngle, numTicks);
   const ticks = tickMarkAngles.reverse();
@@ -59,10 +62,19 @@ export function useGauge(params: UseGaugeParams) {
     [ticks, size, radius]
   );
 
-  // Given an array of indices and a domain of values, create a scale function that returns the closest value for the provided angle
+  const scale = useMemo(
+    () =>
+      scaleLinear({
+        domain: [ticks[0], ticks[ticks.length - 1]],
+        range: [minValue, maxValue],
+        round: true,
+      }),
+    [ticks, minValue, maxValue]
+  );
+
   const getTickValue = useCallback(
-    (angle: number, minValue, maxValue) => {
-      return map(angle, ticks[0], ticks[ticks.length - 1], minValue, maxValue);
+    (angle: number) => {
+      return scale(angle);
     },
     [ticks]
   );

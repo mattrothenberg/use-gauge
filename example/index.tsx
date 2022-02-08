@@ -5,7 +5,7 @@ import { useGauge } from '../.';
 
 const size = 300;
 const min = 20;
-const max = 100;
+const max = 120;
 
 const App = () => {
   const [value, setValue] = React.useState(0);
@@ -13,9 +13,10 @@ const App = () => {
   const { ticks, getTickProps, getLabelProps, getTickValue } = useGauge({
     startAngle: 150,
     endAngle: 390,
-    numTicks: 9,
+    numTicks: 11,
     size,
     padding: 24,
+    domain: [min, max],
   });
 
   return (
@@ -33,7 +34,7 @@ const App = () => {
                   className="text-xs fill-gray-500 font-medium"
                   {...getLabelProps({ angle, offset: 20 })}
                 >
-                  {getTickValue(angle, min, max)}
+                  {getTickValue(angle)}
                 </text>
               </React.Fragment>
             );
