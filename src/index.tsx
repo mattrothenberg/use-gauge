@@ -15,11 +15,31 @@ interface GetTickPropsParams {
   angle: number;
 }
 
+interface GetLabelPropsParams {
+  angle: number;
+  offset: number;
+}
+
 export function useGauge(params: UseGaugeParams) {
   const { startAngle, endAngle, numTicks, width, radius } = params;
 
   const tickMarkAngles = makeTickMarks(startAngle, endAngle, numTicks);
   const ticks = tickMarkAngles.reverse();
+
+  const getLabelProps = useCallback(
+    (params: GetLabelPropsParams) => {
+      const { angle, offset } = params;
+      const p1 = polarToCartesian(width / 2, width / 2, radius - offset, angle);
+
+      return {
+        x: p1.x,
+        y: p1.y,
+        dominantBaseline: 'middle',
+        textAnchor: 'middle',
+      };
+    },
+    [width, radius]
+  );
 
   const getTickProps = useCallback(
     (params: GetTickPropsParams) => {
@@ -35,11 +55,12 @@ export function useGauge(params: UseGaugeParams) {
         y2: p2.y,
       };
     },
-    [ticks]
+    [ticks, width, radius]
   );
 
   return {
     ticks,
     getTickProps,
+    getLabelProps,
   };
 }

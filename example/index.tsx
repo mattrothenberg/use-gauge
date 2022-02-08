@@ -11,11 +11,11 @@ const max = 80;
 const App = () => {
   const [value, setValue] = React.useState(0);
 
-  const { ticks, getTickProps } = useGauge({
+  const { ticks, getTickProps, getLabelProps } = useGauge({
     startAngle: 180,
     endAngle: 360,
     numTicks: 11,
-    radius: 100,
+    radius: 150,
     width,
   });
 
@@ -26,10 +26,18 @@ const App = () => {
           <g id="ticks">
             {ticks.map((angle) => {
               return (
-                <line
-                  className="stroke-gray-500"
-                  {...getTickProps({ angle, length: 10 })}
-                />
+                <>
+                  <line
+                    className="stroke-gray-500"
+                    {...getTickProps({ angle, length: 10 })}
+                  />
+                  <text
+                    className="text-xs fill-gray-500 font-medium"
+                    {...getLabelProps({ angle, offset: 20 })}
+                  >
+                    {angle}
+                  </text>
+                </>
               );
             })}
           </g>
