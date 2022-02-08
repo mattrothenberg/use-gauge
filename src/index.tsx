@@ -22,6 +22,12 @@ interface GetLabelPropsParams {
   offset: number;
 }
 
+interface GetArcPropsParams {
+  offset?: number;
+  startAngle: number;
+  endAngle: number;
+}
+
 function useSVGRef(params: Pick<UseGaugeParams, 'padding'>) {
   const { padding } = params;
   const ref = useRef(null);
@@ -55,7 +61,6 @@ function useSVGRef(params: Pick<UseGaugeParams, 'padding'>) {
 
 export function useGauge(params: UseGaugeParams) {
   const { startAngle, endAngle, numTicks, size, padding, domain } = params;
-  console.log(padding);
   const radius = size;
   const [minValue, maxValue] = domain;
   const ref = useSVGRef({ padding });
@@ -105,18 +110,35 @@ export function useGauge(params: UseGaugeParams) {
     [ticks, minValue, maxValue]
   );
 
-  const getTickValue = useCallback(
-    (angle: number) => {
-      return scale(angle);
-    },
-    [ticks]
-  );
+  function getArcProps(params: GetArcPropsParams) {
+    const { offset = 0, startAngle, endAngle } = params;
+    let start = polarToCartesian(size / 2, size / 2, radius + offset, endAngle);
+    let end = polarToCartesian(size / 2, size / 2, radius + offset, startAngle);
+    let largeArcFlag = endAngle - startAngle <= 180 ? '0' : '1';
+    let d = [
+      'M',
+      start.x,
+      start.y,
+      'A',
+      radius + offset,
+      radius + offset,
+      0,
+      largeArcFlag,
+      0,
+      end.x,
+      end.y,
+    ].join(' ');
+    return {
+      d,
+    };
+  }
 
   return {
     ticks,
     getTickProps,
     getLabelProps,
-    getTickValue,
+    getTickValue: scale,
+    getArcProps,
     ref,
   };
 }
