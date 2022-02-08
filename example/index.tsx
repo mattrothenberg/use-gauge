@@ -3,14 +3,14 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { useGauge } from '../.';
 
-const size = 300;
+const size = 400;
 const min = 20;
 const max = 120;
 
 const App = () => {
   const [value, setValue] = React.useState(0);
 
-  const { ticks, getTickProps, getLabelProps, getTickValue } = useGauge({
+  const { ref, ticks, getTickProps, getLabelProps, getTickValue } = useGauge({
     startAngle: 150,
     endAngle: 390,
     numTicks: 11,
@@ -21,7 +21,7 @@ const App = () => {
 
   return (
     <div className="p-4">
-      <svg height={250} width={size} className="border border-black">
+      <svg ref={ref} className="border border-black max-w-full">
         <g id="ticks">
           {ticks.map((angle) => {
             return (

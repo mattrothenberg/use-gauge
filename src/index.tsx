@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import { scaleLinear } from '@visx/scale';
 import { makeTickMarks, polarToCartesian } from './lib';
 
@@ -22,10 +22,36 @@ interface GetLabelPropsParams {
   offset: number;
 }
 
+function useHookWithRefCallback<T>() {
+  const ref = useRef<T>(null!);
+
+  const setRef = useCallback((node: any) => {
+    if (ref.current) {
+    }
+
+    if (node) {
+      var bbox = node.getBBox();
+      if (!bbox) {
+        throw new Error('Could not get bounding box of SVG.');
+      }
+      const width = bbox.x + bbox.width + bbox.x;
+      const height = bbox.y + bbox.height + bbox.y;
+      node.setAttribute('width', width);
+      node.setAttribute('height', height);
+      node.setAttribute('viewBox', `0 0 ${width} ${height}`);
+    }
+
+    ref.current = node;
+  }, []);
+
+  return [setRef];
+}
+
 export function useGauge(params: UseGaugeParams) {
   const { startAngle, endAngle, numTicks, size, padding, domain } = params;
   const radius = size / 2 - padding;
   const [minValue, maxValue] = domain;
+  const [ref] = useHookWithRefCallback<SVGSVGElement>();
 
   const tickMarkAngles = makeTickMarks(startAngle, endAngle, numTicks);
   const ticks = tickMarkAngles.reverse();
@@ -84,5 +110,6 @@ export function useGauge(params: UseGaugeParams) {
     getTickProps,
     getLabelProps,
     getTickValue,
+    ref,
   };
 }
