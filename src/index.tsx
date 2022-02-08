@@ -3,8 +3,8 @@ import { map, makeTickMarks, polarToCartesian } from './lib';
 
 interface UseGaugeParams {
   // value: number;
-  width: number;
-  radius: number;
+  size: number;
+  padding: number;
   startAngle: number;
   endAngle: number;
   numTicks: number;
@@ -21,7 +21,8 @@ interface GetLabelPropsParams {
 }
 
 export function useGauge(params: UseGaugeParams) {
-  const { startAngle, endAngle, numTicks, width, radius } = params;
+  const { startAngle, endAngle, numTicks, size, padding } = params;
+  const radius = size / 2 - padding;
 
   const tickMarkAngles = makeTickMarks(startAngle, endAngle, numTicks);
   const ticks = tickMarkAngles.reverse();
@@ -29,7 +30,7 @@ export function useGauge(params: UseGaugeParams) {
   const getLabelProps = useCallback(
     (params: GetLabelPropsParams) => {
       const { angle, offset } = params;
-      const p1 = polarToCartesian(width / 2, width / 2, radius - offset, angle);
+      const p1 = polarToCartesian(size / 2, size / 2, radius - offset, angle);
 
       return {
         x: p1.x,
@@ -38,14 +39,14 @@ export function useGauge(params: UseGaugeParams) {
         textAnchor: 'middle',
       };
     },
-    [width, radius]
+    [size, radius]
   );
 
   const getTickProps = useCallback(
     (params: GetTickPropsParams) => {
       const { length, angle } = params;
-      const p1 = polarToCartesian(width / 2, width / 2, radius, angle);
-      const p2 = polarToCartesian(width / 2, width / 2, radius + length, angle);
+      const p1 = polarToCartesian(size / 2, size / 2, radius, angle);
+      const p2 = polarToCartesian(size / 2, size / 2, radius + length, angle);
 
       return {
         key: `tick-${angle}`,
@@ -55,7 +56,7 @@ export function useGauge(params: UseGaugeParams) {
         y2: p2.y,
       };
     },
-    [ticks, width, radius]
+    [ticks, size, radius]
   );
 
   // Given an array of indices and a domain of values, create a scale function that returns the closest value for the provided angle
