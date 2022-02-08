@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { makeTickMarks, polarToCartesian } from './lib';
+import { map, makeTickMarks, polarToCartesian } from './lib';
 
 interface UseGaugeParams {
   // value: number;
@@ -58,9 +58,18 @@ export function useGauge(params: UseGaugeParams) {
     [ticks, width, radius]
   );
 
+  // Given an array of indices and a domain of values, create a scale function that returns the closest value for the provided angle
+  const getTickValue = useCallback(
+    (angle: number, minValue, maxValue) => {
+      return map(angle, ticks[0], ticks[ticks.length - 1], minValue, maxValue);
+    },
+    [ticks]
+  );
+
   return {
     ticks,
     getTickProps,
     getLabelProps,
+    getTickValue,
   };
 }

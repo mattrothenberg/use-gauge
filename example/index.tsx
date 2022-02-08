@@ -6,12 +6,12 @@ import { useGauge } from '../.';
 const width = 500;
 const height = 500;
 const min = 20;
-const max = 80;
+const max = 100;
 
 const App = () => {
   const [value, setValue] = React.useState(0);
 
-  const { ticks, getTickProps, getLabelProps } = useGauge({
+  const { ticks, getTickProps, getLabelProps, getTickValue } = useGauge({
     startAngle: 180,
     endAngle: 360,
     numTicks: 11,
@@ -35,7 +35,7 @@ const App = () => {
                     className="text-xs fill-gray-500 font-medium"
                     {...getLabelProps({ angle, offset: 20 })}
                   >
-                    {angle}
+                    {getTickValue(angle, min, max)}
                   </text>
                 </>
               );
