@@ -2,35 +2,54 @@ import 'react-app-polyfill/ie11';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { useGauge } from '../.';
-
-const size = 200;
-const min = 20;
-const max = 120;
+import { useControls } from 'leva';
 
 const App = () => {
-  const [value, setValue] = React.useState(0);
+  const {
+    value,
+    size,
+    minValue,
+    maxValue,
+    startAngle,
+    endAngle,
+    numTicks,
+    padding,
+  } = useControls({
+    size: { value: 200 },
+    value: { value: 0, min: 0, max: 100 },
+    minValue: { value: 0 },
+    maxValue: { value: 100 },
+    startAngle: { value: 150, min: 0, max: 360, step: 1 },
+    endAngle: { value: 390, min: 0, max: 720, step: 1 },
+    numTicks: { value: 11, min: 0, max: 30, step: 1 },
+    padding: { value: 24, min: 0, max: 100, step: 1 },
+  });
 
-  const { ref, ticks, getTickProps, getLabelProps, getTickValue, getArcProps } =
+  const { ref, ticks, getTickProps, getLabelProps, scale, getArcProps } =
     useGauge({
-      startAngle: 150,
-      endAngle: 390,
-      numTicks: 11,
+      startAngle,
+      endAngle,
+      numTicks,
       size,
-      padding: 24,
-      domain: [min, max],
+      padding,
+      domain: [minValue, maxValue],
     });
 
   return (
     <div className="p-4">
       <svg ref={ref} className="border border-black max-w-full">
         <path
-          {...getArcProps({ offset: 8, startAngle: 150, endAngle: 390 })}
+          {...getArcProps({ offset: 8, startAngle, endAngle })}
           fill="none"
           className="stroke-gray-100"
           strokeWidth={16}
         />
         <path
-          {...getArcProps({ offset: 8, startAngle: 150, endAngle: 180 })}
+          {...getArcProps({
+            offset: 8,
+            startAngle: 150,
+            endAngle: scale.invert(value),
+          })}
           fill="none"
           className="stroke-blue-400"
           strokeWidth={16}
@@ -47,7 +66,7 @@ const App = () => {
                   className="text-sm fill-gray-500 font-medium"
                   {...getLabelProps({ angle, offset: 20 })}
                 >
-                  {getTickValue(angle)}
+                  {scale(angle)}
                 </text>
               </React.Fragment>
             );
@@ -56,14 +75,7 @@ const App = () => {
       </svg>
       <div className="mt-4">
         <p>Value: {value}</p>
-        <input
-          className="w-full"
-          type="range"
-          min={min}
-          max={max}
-          value={value}
-          onChange={(e) => setValue(Number(e.target.value))}
-        />
+        <p>Angle: {Math.ceil(scale.invert(value))}</p>
       </div>
     </div>
   );

@@ -28,42 +28,45 @@ interface GetArcPropsParams {
   endAngle: number;
 }
 
-function useSVGRef(params: Pick<UseGaugeParams, 'padding'>) {
-  const { padding } = params;
+function useSVGRef(params: UseGaugeParams) {
+  const { padding, size, startAngle, endAngle, numTicks } = params;
   const ref = useRef(null);
 
-  const setRef = useCallback((node: any) => {
-    if (ref.current) {
-    }
-
-    if (node) {
-      var bbox = node.getBBox();
-      if (!bbox) {
-        throw new Error('Could not get bounding box of SVG.');
+  const setRef = useCallback(
+    (node: any) => {
+      if (ref.current) {
       }
-      const width = bbox.width;
-      const height = bbox.height;
-      node.setAttribute('width', width);
-      node.setAttribute('height', height);
-      node.setAttribute(
-        'viewBox',
-        `${bbox.x - padding / 2} ${bbox.y - padding / 2} ${width + padding} ${
-          height + padding
-        }`
-      );
-    }
 
-    ref.current = node;
-  }, []);
+      if (node) {
+        var bbox = node.getBBox();
+        if (!bbox) {
+          throw new Error('Could not get bounding box of SVG.');
+        }
+        const width = bbox.width;
+        const height = bbox.height;
+        node.setAttribute('width', width);
+        node.setAttribute('height', height);
+        node.setAttribute(
+          'viewBox',
+          `${bbox.x - padding / 2} ${bbox.y - padding / 2} ${width + padding} ${
+            height + padding
+          }`
+        );
+      }
+
+      ref.current = node;
+    },
+    [padding, size, startAngle, endAngle, numTicks]
+  );
 
   return setRef;
 }
 
 export function useGauge(params: UseGaugeParams) {
-  const { startAngle, endAngle, numTicks, size, padding, domain } = params;
+  const { startAngle, endAngle, numTicks, size, domain } = params;
   const radius = size;
   const [minValue, maxValue] = domain;
-  const ref = useSVGRef({ padding });
+  const ref = useSVGRef(params);
 
   const tickMarkAngles = makeTickMarks(startAngle, endAngle, numTicks);
   const ticks = tickMarkAngles.reverse();
@@ -137,7 +140,7 @@ export function useGauge(params: UseGaugeParams) {
     ticks,
     getTickProps,
     getLabelProps,
-    getTickValue: scale,
+    scale,
     getArcProps,
     ref,
   };
