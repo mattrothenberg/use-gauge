@@ -3,7 +3,7 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { useGauge } from '../.';
 
-const size = 400;
+const size = 200;
 const min = 20;
 const max = 120;
 
@@ -31,7 +31,7 @@ const App = () => {
                   {...getTickProps({ angle, length: 10 })}
                 />
                 <text
-                  className="text-xs fill-gray-500 font-medium"
+                  className="text-sm fill-gray-500 font-medium"
                   {...getLabelProps({ angle, offset: 20 })}
                 >
                   {getTickValue(angle)}

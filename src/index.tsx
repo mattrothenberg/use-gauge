@@ -22,8 +22,9 @@ interface GetLabelPropsParams {
   offset: number;
 }
 
-function useHookWithRefCallback<T>() {
-  const ref = useRef<T>(null!);
+function useSVGRef(params: Pick<UseGaugeParams, 'padding'>) {
+  const { padding } = params;
+  const ref = useRef(null);
 
   const setRef = useCallback((node: any) => {
     if (ref.current) {
@@ -34,24 +35,30 @@ function useHookWithRefCallback<T>() {
       if (!bbox) {
         throw new Error('Could not get bounding box of SVG.');
       }
-      const width = bbox.x + bbox.width + bbox.x;
-      const height = bbox.y + bbox.height + bbox.y;
+      const width = bbox.width;
+      const height = bbox.height;
       node.setAttribute('width', width);
       node.setAttribute('height', height);
-      node.setAttribute('viewBox', `0 0 ${width} ${height}`);
+      node.setAttribute(
+        'viewBox',
+        `${bbox.x - padding / 2} ${bbox.y - padding / 2} ${width + padding} ${
+          height + padding
+        }`
+      );
     }
 
     ref.current = node;
   }, []);
 
-  return [setRef];
+  return setRef;
 }
 
 export function useGauge(params: UseGaugeParams) {
   const { startAngle, endAngle, numTicks, size, padding, domain } = params;
-  const radius = size / 2 - padding;
+  console.log(padding);
+  const radius = size;
   const [minValue, maxValue] = domain;
-  const [ref] = useHookWithRefCallback<SVGSVGElement>();
+  const ref = useSVGRef({ padding });
 
   const tickMarkAngles = makeTickMarks(startAngle, endAngle, numTicks);
   const ticks = tickMarkAngles.reverse();
