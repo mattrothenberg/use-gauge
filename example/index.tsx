@@ -24,26 +24,24 @@ const App = () => {
     <div className="p-4">
       <svg ref={ref} className="border border-black max-w-full">
         <path
-          {...getArcProps({ offset: 0, startAngle: 150, endAngle: 390 })}
+          {...getArcProps({ offset: 8, startAngle: 150, endAngle: 390 })}
           fill="none"
           className="stroke-gray-100"
-          strokeWidth={24}
-          strokeLinecap="round"
+          strokeWidth={16}
         />
         <path
-          {...getArcProps({ offset: 0, startAngle: 150, endAngle: 180 })}
+          {...getArcProps({ offset: 8, startAngle: 150, endAngle: 180 })}
           fill="none"
           className="stroke-blue-400"
-          strokeWidth={24}
-          strokeLinecap="round"
+          strokeWidth={16}
         />
         <g id="ticks">
           {ticks.map((angle) => {
             return (
               <React.Fragment key={`tick-group-${angle}`}>
                 <line
-                  className="stroke-gray-500"
-                  {...getTickProps({ angle, length: 10 })}
+                  className="stroke-gray-500 opacity-50"
+                  {...getTickProps({ angle, length: 16 })}
                 />
                 <text
                   className="text-sm fill-gray-500 font-medium"
