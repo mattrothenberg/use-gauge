@@ -39,7 +39,7 @@ const App = () => {
       step: 1,
     },
     strokeWidth: {
-      value: 16,
+      value: 24,
       min: 0,
       max: 100,
     },
@@ -118,12 +118,12 @@ const App = () => {
             offset,
             startAngle,
             endAngle,
-            strokeWidth: arcStrokeWidth,
           })}
           fill="none"
           className="stroke-gray-100"
+          strokeWidth={arcStrokeWidth}
           // @ts-ignore
-          // strokeLinecap={strokeLineCap}
+          strokeLinecap={strokeLineCap}
         />
         {value > minValue && (
           <path
@@ -131,12 +131,12 @@ const App = () => {
               offset,
               startAngle,
               endAngle: valueToAngle(value),
-              strokeWidth: arcStrokeWidth,
             })}
             fill="none"
             stroke={progressColor}
+            strokeWidth={arcStrokeWidth}
             // @ts-ignore
-            // strokeLinecap={strokeLineCap}
+            strokeLinecap={strokeLineCap}
           />
         )}
         <g id="ticks">

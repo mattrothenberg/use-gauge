@@ -26,7 +26,7 @@ interface GetLabelPropsParams {
   offset: number;
 }
 
-interface GetArcPropsParams extends React.SVGProps<SVGPathElement> {
+interface GetArcPropsParams {
   offset?: number;
   startAngle: number;
   endAngle: number;
@@ -142,9 +142,7 @@ export function useGauge(params: UseGaugeParams) {
 
   const getArcProps = useCallback(
     (params: GetArcPropsParams) => {
-      const { offset = 0, startAngle, endAngle, strokeWidth, ...rest } = params;
-
-      let stroke = parseInt(String(strokeWidth));
+      const { offset = 0, startAngle, endAngle, ...rest } = params;
 
       if (svg.current) {
         redrawSvg(svg.current, { padding });
@@ -153,14 +151,14 @@ export function useGauge(params: UseGaugeParams) {
       let start = polarToCartesian(
         size / 2,
         size / 2,
-        radius + offset + stroke,
+        radius + offset,
         endAngle
       );
 
       let end = polarToCartesian(
         size / 2,
         size / 2,
-        radius + offset + stroke,
+        radius + offset,
         startAngle
       );
 
@@ -170,8 +168,8 @@ export function useGauge(params: UseGaugeParams) {
         start.x,
         start.y,
         'A',
-        radius + offset + stroke,
-        radius + offset + stroke,
+        radius + offset,
+        radius + offset,
         0,
         largeArcFlag,
         0,
@@ -181,7 +179,6 @@ export function useGauge(params: UseGaugeParams) {
 
       return {
         d,
-        strokeWidth,
         ...rest,
       };
     },
