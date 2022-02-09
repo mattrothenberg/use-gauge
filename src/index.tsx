@@ -26,15 +26,35 @@ interface GetLabelPropsParams {
   offset: number;
 }
 
-interface GetArcPropsParams {
+interface GetArcPropsParams extends React.SVGProps<SVGPathElement> {
   offset?: number;
   startAngle: number;
   endAngle: number;
 }
 
+interface RedrawSVGParams {
+  padding: number;
+}
+
+function redrawSvg(node: SVGSVGElement, params: RedrawSVGParams) {
+  const { padding } = params;
+  const bbox = node.getBBox({ stroke: true });
+  const width = bbox.width;
+  const height = bbox.height;
+
+  node.setAttribute('width', String(width));
+  node.setAttribute('height', String(height));
+  node.setAttribute(
+    'viewBox',
+    `${bbox.x - padding / 2} ${bbox.y - padding / 2} ${width + padding} ${
+      height + padding
+    }`
+  );
+}
+
 function useSVGRef(params: UseGaugeParams) {
   const { padding, size, startAngle, endAngle, numTicks } = params;
-  const ref = useRef(null);
+  const ref = useRef<SVGSVGElement>(null!);
 
   const setRef = useCallback(
     (node: any) => {
@@ -42,20 +62,9 @@ function useSVGRef(params: UseGaugeParams) {
       }
 
       if (node) {
-        var bbox = node.getBBox();
-        if (!bbox) {
-          throw new Error('Could not get bounding box of SVG.');
-        }
-        const width = bbox.width;
-        const height = bbox.height;
-        node.setAttribute('width', width);
-        node.setAttribute('height', height);
-        node.setAttribute(
-          'viewBox',
-          `${bbox.x - padding / 2} ${bbox.y - padding / 2} ${width + padding} ${
-            height + padding
-          }`
-        );
+        redrawSvg(node, {
+          padding,
+        });
       }
 
       ref.current = node;
@@ -63,14 +72,17 @@ function useSVGRef(params: UseGaugeParams) {
     [padding, size, startAngle, endAngle, numTicks]
   );
 
-  return setRef;
+  return {
+    setRef,
+    svg: ref,
+  };
 }
 
 export function useGauge(params: UseGaugeParams) {
-  const { startAngle, endAngle, numTicks, size, domain } = params;
+  const { startAngle, endAngle, numTicks, size, domain, padding } = params;
   const radius = size;
   const [minValue, maxValue] = domain;
-  const ref = useSVGRef(params);
+  const { setRef: ref, svg } = useSVGRef(params);
 
   const ticks = useMemo(() => {
     return makeTickMarks(startAngle, endAngle, numTicks).reverse();
@@ -78,6 +90,9 @@ export function useGauge(params: UseGaugeParams) {
 
   const getLabelProps = useCallback(
     (params: GetLabelPropsParams) => {
+      if (svg.current) {
+        redrawSvg(svg.current, { padding });
+      }
       const { angle, offset } = params;
       const p1 = polarToCartesian(size / 2, size / 2, radius - offset, angle);
 
@@ -93,6 +108,9 @@ export function useGauge(params: UseGaugeParams) {
 
   const getTickProps = useCallback(
     (params: GetTickPropsParams) => {
+      if (svg.current) {
+        redrawSvg(svg.current, { padding });
+      }
       const { length, angle } = params;
       const p1 = polarToCartesian(size / 2, size / 2, radius, angle);
       const p2 = polarToCartesian(size / 2, size / 2, radius + length, angle);
@@ -124,35 +142,47 @@ export function useGauge(params: UseGaugeParams) {
 
   const getArcProps = useCallback(
     (params: GetArcPropsParams) => {
-      const { offset = 0, startAngle, endAngle } = params;
+      const { offset = 0, startAngle, endAngle, strokeWidth, ...rest } = params;
+
+      let stroke = parseInt(String(strokeWidth));
+
+      if (svg.current) {
+        redrawSvg(svg.current, { padding });
+      }
+
       let start = polarToCartesian(
         size / 2,
         size / 2,
-        radius + offset,
+        radius + offset + stroke,
         endAngle
       );
+
       let end = polarToCartesian(
         size / 2,
         size / 2,
-        radius + offset,
+        radius + offset + stroke,
         startAngle
       );
+
       let largeArcFlag = endAngle - startAngle <= 180 ? '0' : '1';
       let d = [
         'M',
         start.x,
         start.y,
         'A',
-        radius + offset,
-        radius + offset,
+        radius + offset + stroke,
+        radius + offset + stroke,
         0,
         largeArcFlag,
         0,
         end.x,
         end.y,
       ].join(' ');
+
       return {
         d,
+        strokeWidth,
+        ...rest,
       };
     },
     [size, radius]
@@ -160,6 +190,9 @@ export function useGauge(params: UseGaugeParams) {
 
   const getNeedleProps = useCallback(
     (params: GetNeedleParams) => {
+      if (svg.current) {
+        redrawSvg(svg.current, { padding });
+      }
       const { value, baseRadius, tipRadius } = params;
       const angle = valueToAngle(value);
 
