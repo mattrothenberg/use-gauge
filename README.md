@@ -1,5 +1,8 @@
 # use-gauge
 
+[![npm version](https://badge.fury.io/js/use-gauge.svg)](https://badge.fury.io/js/use-gauge)
+![bundlesize](https://img.shields.io/bundlephobia/minzip/use-gauge?style=flat)
+
 A headless React hook for building gauge charts. You bring the styles, we bring the math that powers your chart!
 
 <img width="848" alt="Screen Shot 2022-02-08 at 11 05 36 PM" src="https://user-images.githubusercontent.com/5148596/153119954-e80dd6c0-e7f4-4a21-8b49-ef3282885bcd.png">
