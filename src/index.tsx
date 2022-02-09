@@ -178,7 +178,7 @@ export function useGauge(params: UseGaugeParams) {
     [diameter]
   );
 
-  const getGaugeSVGProps = () => {
+  const getSVGProps = () => {
     const getDistanceForDirection = (deg: number) => {
       if (startAngle < deg && endAngle > deg) return diameter / 2;
       const startAngleDistance = calculatediameterForDirection(
@@ -219,6 +219,6 @@ export function useGauge(params: UseGaugeParams) {
     angleToValue,
     getArcProps,
     getNeedleProps,
-    getGaugeSVGProps,
+    getSVGProps,
   };
 }

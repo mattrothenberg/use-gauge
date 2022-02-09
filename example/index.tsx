@@ -89,7 +89,7 @@ const App = () => {
     angleToValue,
     getArcProps,
     getNeedleProps,
-    getGaugeSVGProps,
+    getSVGProps,
   } = useGauge({
     startAngle,
     endAngle,
@@ -106,7 +106,7 @@ const App = () => {
 
   return (
     <div className="h-screen flex items-center justify-center">
-      <svg {...getGaugeSVGProps()} className="max-w-full overflow-visible">
+      <svg {...getSVGProps()} className="max-w-full overflow-visible">
         <path
           {...getArcProps({
             offset,
