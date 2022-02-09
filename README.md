@@ -1,6 +1,6 @@
 # use-gauge
 
-A headless React library for building gauge charts.
+A headless React hook for building gauge charts.
 
 ## Installation
 
@@ -16,7 +16,8 @@ In your React project, import the `useGauge` hook and invoke it with the followi
 const {
   ref,
   ticks,
-  scale,
+  valueToAngle,
+  angleToValue,
   getTickProps,
   getLabelProps,
   getArcProps,
@@ -43,7 +44,7 @@ _Please_ be sure to apply this `ref` to your SVG component, as it's responsible 
 <svg ref={ref}></svg>
 ```
 
-### ticks, getTickProps, getLabelProps, and scale
+### ticks, getTickProps, getLabelProps, and angleToValue
 
 `ticks` is an array of evenly spaced angles (represented as numbers) that's calculated from the `numTicks`, `startAngle,` and `endAngle` argument.
 
@@ -51,7 +52,7 @@ You can create visual tick marks on the SVG by mapping over this array and passi
 
 Additionally, you can render text labels for tick mark by invoking the `getLabelProps` on the given angle (along wiht an `offset` argument that determines how far the label sits from the tick).
 
-Note that you'll need to convert the given angle to its "value" counterpart (as minValue and maxValue are the domain of our dataset) by invoking the `scale` function with the given angle as an argument.
+Note that you'll need to convert the given angle to its "value" counterpart (as minValue and maxValue are the domain of our dataset) by invoking the `angleToValue` function with the given angle as an argument.
 
 ```tsx
 {
@@ -66,7 +67,7 @@ Note that you'll need to convert the given angle to its "value" counterpart (as 
           className="text-sm fill-gray-500 font-medium"
           {...getLabelProps({ angle, offset: 20 })}
         >
-          {scale(angle)}
+          {angleToValue(angle)}
         </text>
       </React.Fragment>
     );
@@ -78,7 +79,7 @@ Note that you'll need to convert the given angle to its "value" counterpart (as 
 
 This function allows you to render arcs of arbitrary length, as expressed by a start angle and end angle. A common use-case might be to have two arcs: one as a "background", and another that represents the progress of the gauge.
 
-You can calculate progress in this scenario by inverting your numerical value with the `scale` function.
+You can calculate progress in this scenario by converting your numerical value to its angle counterpart with the `valueToAngle` function.
 
 ```tsx
 // Background
@@ -94,7 +95,7 @@ You can calculate progress in this scenario by inverting your numerical value wi
 {...getArcProps({
   offset,
   startAngle,
-  endAngle: scale.invert(value),
+  endAngle: valueToAngle(value),
 })}
 className="stroke-blue-600"
 strokeLinecap="round"

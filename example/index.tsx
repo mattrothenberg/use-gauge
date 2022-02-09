@@ -88,7 +88,8 @@ const App = () => {
     ticks,
     getTickProps,
     getLabelProps,
-    scale,
+    valueToAngle,
+    angleToValue,
     getArcProps,
     getNeedleProps,
   } = useGauge({
@@ -122,7 +123,7 @@ const App = () => {
             {...getArcProps({
               offset,
               startAngle,
-              endAngle: scale.invert(value),
+              endAngle: valueToAngle(value),
             })}
             fill="none"
             stroke={progressColor}
@@ -143,7 +144,7 @@ const App = () => {
                   className="text-sm fill-gray-500 font-medium"
                   {...getLabelProps({ angle, offset: 20 })}
                 >
-                  {scale(angle)}
+                  {angleToValue(angle)}
                 </text>
               </React.Fragment>
             );
