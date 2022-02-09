@@ -1,181 +1,131 @@
-# TSDX React w/ Storybook User Guide
+# use-gauge
 
-Congrats! You just saved yourself hours of work by bootstrapping this project with TSDX. Let’s get you oriented with what’s here and how to use it.
+A headless React library for building gauge charts.
 
-> This TSDX setup is meant for developing React component libraries (not apps!) that can be published to NPM. If you’re looking to build a React-based app, you should use `create-react-app`, `razzle`, `nextjs`, `gatsby`, or `react-static`.
-
-> If you’re new to TypeScript and React, checkout [this handy cheatsheet](https://github.com/sw-yx/react-typescript-cheatsheet/)
-
-## Commands
-
-TSDX scaffolds your new library inside `/src`, and also sets up a [Parcel-based](https://parceljs.org) playground for it inside `/example`.
-
-The recommended workflow is to run TSDX in one terminal:
+## Installation
 
 ```bash
-npm start # or yarn start
+yarn add use-gauge
 ```
 
-This builds to `/dist` and runs the project in watch mode so any edits you save inside `src` causes a rebuild to `/dist`.
+## Usage
 
-Then run either Storybook or the example playground:
+In your React project, import the `useGauge` hook and invoke it with the following parameters.
 
-### Storybook
-
-Run inside another terminal:
-
-```bash
-yarn storybook
+```tsx
+const {
+  ref,
+  ticks,
+  scale,
+  getTickProps,
+  getLabelProps,
+  getArcProps,
+  getNeedleProps,
+} = useGauge({
+  startAngle: 180, // determines where the gauge starts
+  endAngle: 360, // determines where the gauge ends
+  numTicks, // the number of ticks to display between the min and max values
+  size, // how large the chart should be (TODO: Investigate a better API)
+  padding, // Honestly kind of a misnomer, as it really just zooms the chart in and out. (TODO: Investigate a better API)
+  domain: [minValue, maxValue], // Min and max values for your gauge. *Please* use a min that's smaller than the max :)
+});
 ```
 
-This loads the stories from `./stories`.
+If you want to skip ahead and see a fully baked implementation of this hook, check out [the example playground](/example/index.tsx).
 
-> NOTE: Stories should reference the components as if using the library, similar to the example playground. This means importing from the root project directory. This has been aliased in the tsconfig and the storybook webpack config as a helper.
+Otherwise, here's a brief explanation of how these returned values work.
 
-### Example
+### ref
 
-Then run the example inside another:
+_Please_ be sure to apply this `ref` to your SVG component, as it's responsible for programatically updating the height, width, and viewBox of the element as a function of the `size` you provide. To be totally honest, I'm not in love with this API and really wish I could get rid of the `size` prop in earnest but this was the path of least resistance.
 
-```bash
-cd example
-npm i # or yarn to install dependencies
-npm start # or yarn start
+```tsx
+<svg ref={ref}></svg>
 ```
 
-The default example imports and live reloads whatever is in `/dist`, so if you are seeing an out of date component, make sure TSDX is running in watch mode like we recommend above. **No symlinking required**, we use [Parcel's aliasing](https://parceljs.org/module_resolution.html#aliases).
+### ticks, getTickProps, getLabelProps, and scale
 
-To do a one-off build, use `npm run build` or `yarn build`.
+`ticks` is an array of evenly spaced angles (represented as numbers) that's calculated from the `numTicks`, `startAngle,` and `endAngle` argument.
 
-To run tests, use `npm test` or `yarn test`.
+You can create visual tick marks on the SVG by mapping over this array and passing each angle (along with a `length` argument) to the `getTickProps` function accordingly.
 
-## Configuration
+Additionally, you can render text labels for tick mark by invoking the `getLabelProps` on the given angle (along wiht an `offset` argument that determines how far the label sits from the tick).
 
-Code quality is set up for you with `prettier`, `husky`, and `lint-staged`. Adjust the respective fields in `package.json` accordingly.
+Note that you'll need to convert the given angle to its "value" counterpart (as minValue and maxValue are the domain of our dataset) by invoking the `scale` function with the given angle as an argument.
 
-### Jest
-
-Jest tests are set up to run with `npm test` or `yarn test`.
-
-### Bundle analysis
-
-Calculates the real cost of your library using [size-limit](https://github.com/ai/size-limit) with `npm run size` and visulize it with `npm run analyze`.
-
-#### Setup Files
-
-This is the folder structure we set up for you:
-
-```txt
-/example
-  index.html
-  index.tsx       # test your component here in a demo app
-  package.json
-  tsconfig.json
-/src
-  index.tsx       # EDIT THIS
-/test
-  blah.test.tsx   # EDIT THIS
-/stories
-  Thing.stories.tsx # EDIT THIS
-/.storybook
-  main.js
-  preview.js
-.gitignore
-package.json
-README.md         # EDIT THIS
-tsconfig.json
-```
-
-#### React Testing Library
-
-We do not set up `react-testing-library` for you yet, we welcome contributions and documentation on this.
-
-### Rollup
-
-TSDX uses [Rollup](https://rollupjs.org) as a bundler and generates multiple rollup configs for various module formats and build settings. See [Optimizations](#optimizations) for details.
-
-### TypeScript
-
-`tsconfig.json` is set up to interpret `dom` and `esnext` types, as well as `react` for `jsx`. Adjust according to your needs.
-
-## Continuous Integration
-
-### GitHub Actions
-
-Two actions are added by default:
-
-- `main` which installs deps w/ cache, lints, tests, and builds on all pushes against a Node and OS matrix
-- `size` which comments cost comparison of your library on every pull request using [size-limit](https://github.com/ai/size-limit)
-
-## Optimizations
-
-Please see the main `tsdx` [optimizations docs](https://github.com/palmerhq/tsdx#optimizations). In particular, know that you can take advantage of development-only optimizations:
-
-```js
-// ./types/index.d.ts
-declare var __DEV__: boolean;
-
-// inside your code...
-if (__DEV__) {
-  console.log('foo');
+```tsx
+{
+  ticks.map((angle) => {
+    return (
+      <React.Fragment key={`tick-group-${angle}`}>
+        <line
+          stroke={tickColor}
+          {...getTickProps({ angle, length: tickLength })}
+        />
+        <text
+          className="text-sm fill-gray-500 font-medium"
+          {...getLabelProps({ angle, offset: 20 })}
+        >
+          {scale(angle)}
+        </text>
+      </React.Fragment>
+    );
+  });
 }
 ```
 
-You can also choose to install and use [invariant](https://github.com/palmerhq/tsdx#invariant) and [warning](https://github.com/palmerhq/tsdx#warning) functions.
+### getArcProps
 
-## Module Formats
+This function allows you to render arcs of arbitrary length, as expressed by a start angle and end angle. A common use-case might be to have two arcs: one as a "background", and another that represents the progress of the gauge.
 
-CJS, ESModules, and UMD module formats are supported.
+You can calculate progress in this scenario by inverting your numerical value with the `scale` function.
 
-The appropriate paths are configured in `package.json` and `dist/index.js` accordingly. Please report if any issues are found.
+```tsx
+// Background
+<path
+  {...getArcProps({ offset, startAngle: 180, endAngle: 360 })}
+  className="stroke-gray-100"
+  strokeLinecap="round"
+  strokeWidth={24}
+/>
 
-## Deploying the Example Playground
-
-The Playground is just a simple [Parcel](https://parceljs.org) app, you can deploy it anywhere you would normally deploy that. Here are some guidelines for **manually** deploying with the Netlify CLI (`npm i -g netlify-cli`):
-
-```bash
-cd example # if not already in the example folder
-npm run build # builds to dist
-netlify deploy # deploy the dist folder
+// Progress
+<path
+{...getArcProps({
+  offset,
+  startAngle,
+  endAngle: scale.invert(value),
+})}
+className="stroke-blue-600"
+strokeLinecap="round"
+strokeWidth={24}
+/>
 ```
 
-Alternatively, if you already have a git repo connected, you can set up continuous deployment with Netlify:
+### getNeedleProps
 
-```bash
-netlify init
-# build command: yarn build && cd example && yarn && yarn build
-# directory to deploy: example/dist
-# pick yes for netlify.toml
+Last but not least, this function helps you draw a needle shape on your gauge. Specifically, it returns the bits you need to draw: A) the "tip" of the needle (i.e., the small circle at the top), B) the "base" of the needle (i.e., the bigger circle at the bottom), and C) the "body" of the needle (i.e., the polyline that connects these two circles).
+
+Warning: this API is _janky_. There's got to be a better way of handling this, but again, this is what worked for my initial use case 🤷🏻‍♂️
+
+```tsx
+const { tip, base, points } = getNeedleProps({
+  value,
+  baseRadius: 12,
+  tipRadius: 8,
+});
+
+<g id="needle">
+  <circle className="fill-gray-300" {...base} r={24} />
+  <circle fill={needleColor} {...base} />
+  <circle fill={needleColor} {...tip} />
+  <polyline fill={needleColor} points={points} />
+  <circle className="fill-white" {...base} r={4} />
+</g>;
 ```
 
-## Named Exports
+## Local Development
 
-Per Palmer Group guidelines, [always use named exports.](https://github.com/palmerhq/typescript#exports) Code split inside your React app instead of your React library.
+From the project root, run `yarn start`. This will run `tsdx` in watch mode, and will re-compile the code every time you save.
 
-## Including Styles
-
-There are many ways to ship styles, including with CSS-in-JS. TSDX has no opinion on this, configure how you like.
-
-For vanilla CSS, you can include it at the root directory and add it to the `files` section in your `package.json`, so that it can be imported separately by your users and run through their bundler's loader.
-
-## Publishing to NPM
-
-We recommend using [np](https://github.com/sindresorhus/np).
-
-## Usage with Lerna
-
-When creating a new package with TSDX within a project set up with Lerna, you might encounter a `Cannot resolve dependency` error when trying to run the `example` project. To fix that you will need to make changes to the `package.json` file _inside the `example` directory_.
-
-The problem is that due to the nature of how dependencies are installed in Lerna projects, the aliases in the example project's `package.json` might not point to the right place, as those dependencies might have been installed in the root of your Lerna project.
-
-Change the `alias` to point to where those packages are actually installed. This depends on the directory structure of your Lerna project, so the actual path might be different from the diff below.
-
-```diff
-   "alias": {
--    "react": "../node_modules/react",
--    "react-dom": "../node_modules/react-dom"
-+    "react": "../../../node_modules/react",
-+    "react-dom": "../../../node_modules/react-dom"
-   },
-```
-
-An alternative to fixing this problem would be to remove aliases altogether and define the dependencies referenced as aliases as dev dependencies instead. [However, that might cause other problems.](https://github.com/palmerhq/tsdx/issues/64)
+In a different terminal window, `cd` into the `/example` directory and run `yarn start`. This will boot up Parcel and open a web server at http://localhost:1234. All of your changes to the hook source code will (eventually) propagate to Parcel's hot-reloading server.
