@@ -18,6 +18,9 @@ yarn add use-gauge
 
 ## Usage
 
+
+🚨 Beware that this API is very much in flux! Breaking changes **will** occur, but I'll update these docs and the Codesandbox accordingly 🚨
+
 In your React project, import the `useGauge` hook and invoke it with the following parameters.
 
 ```tsx
