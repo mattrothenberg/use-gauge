@@ -1,4 +1,5 @@
 import 'react-app-polyfill/ie11';
+import './index.css';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { useGauge } from '../.';
@@ -14,7 +15,7 @@ const App = () => {
     endAngle,
     numTicks,
     padding,
-  } = useControls({
+  } = useControls('Gauge settings', {
     size: { value: 200 },
     value: { value: 0, min: 0, max: 100 },
     minValue: { value: 0 },
@@ -23,6 +24,43 @@ const App = () => {
     endAngle: { value: 390, min: 0, max: 720, step: 1 },
     numTicks: { value: 11, min: 0, max: 30, step: 1 },
     padding: { value: 24, min: 0, max: 100, step: 1 },
+  });
+
+  const {
+    offset,
+    strokeWidth: arcStrokeWidth,
+    color: progressColor,
+    strokeLineCap,
+  } = useControls('Arc Props', {
+    offset: {
+      value: 8,
+      min: 0,
+      max: 100,
+      step: 1,
+    },
+    strokeWidth: {
+      value: 16,
+      min: 0,
+      max: 100,
+    },
+    color: {
+      value: 'cornflowerblue',
+    },
+    strokeLineCap: {
+      value: 'round',
+      options: ['butt', 'round', 'square'],
+    },
+  });
+
+  const { color: tickColor, length: tickLength } = useControls('Tick Props', {
+    color: {
+      value: '#ccc',
+    },
+    length: {
+      value: 10,
+      min: 0,
+      max: 50,
+    },
   });
 
   const { ref, ticks, getTickProps, getLabelProps, scale, getArcProps } =
@@ -36,31 +74,37 @@ const App = () => {
     });
 
   return (
-    <div className="p-4">
-      <svg ref={ref} className="border border-black max-w-full">
+    <div className="h-screen flex items-center justify-center">
+      <svg ref={ref} className="max-w-full">
         <path
-          {...getArcProps({ offset: 8, startAngle, endAngle })}
+          {...getArcProps({ offset, startAngle, endAngle })}
           fill="none"
           className="stroke-gray-100"
-          strokeWidth={16}
+          // @ts-ignore
+          strokeLinecap={strokeLineCap}
+          strokeWidth={arcStrokeWidth}
         />
-        <path
-          {...getArcProps({
-            offset: 8,
-            startAngle: 150,
-            endAngle: scale.invert(value),
-          })}
-          fill="none"
-          className="stroke-blue-400"
-          strokeWidth={16}
-        />
+        {value > minValue && (
+          <path
+            {...getArcProps({
+              offset,
+              startAngle,
+              endAngle: scale.invert(value),
+            })}
+            fill="none"
+            stroke={progressColor}
+            // @ts-ignore
+            strokeLinecap={strokeLineCap}
+            strokeWidth={arcStrokeWidth}
+          />
+        )}
         <g id="ticks">
           {ticks.map((angle) => {
             return (
               <React.Fragment key={`tick-group-${angle}`}>
                 <line
-                  className="stroke-gray-500 opacity-50"
-                  {...getTickProps({ angle, length: 16 })}
+                  stroke={tickColor}
+                  {...getTickProps({ angle, length: tickLength })}
                 />
                 <text
                   className="text-sm fill-gray-500 font-medium"
@@ -73,10 +117,6 @@ const App = () => {
           })}
         </g>
       </svg>
-      <div className="mt-4">
-        <p>Value: {value}</p>
-        <p>Angle: {Math.ceil(scale.invert(value))}</p>
-      </div>
     </div>
   );
 };
