@@ -1,6 +1,6 @@
 # use-gauge
 
-A headless React library for building gauge charts.
+A headless React hook for building gauge charts.
 
 ## Installation
 
