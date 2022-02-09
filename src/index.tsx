@@ -1,9 +1,8 @@
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useMemo } from 'react';
 import { degreesToRadians, makeTickMarks, polarToCartesian } from './lib';
 
 interface UseGaugeParams {
-  size: number;
-  padding: number;
+  diameter: number;
   startAngle: number;
   endAngle: number;
   numTicks: number;
@@ -32,57 +31,10 @@ interface GetArcPropsParams {
   endAngle: number;
 }
 
-interface RedrawSVGParams {
-  padding: number;
-}
-
-function redrawSvg(node: SVGSVGElement, params: RedrawSVGParams) {
-  const { padding } = params;
-  const bbox = node.getBBox({ stroke: true });
-  const width = bbox.width;
-  const height = bbox.height;
-
-  node.setAttribute('width', String(width));
-  node.setAttribute('height', String(height));
-  node.setAttribute(
-    'viewBox',
-    `${bbox.x - padding / 2} ${bbox.y - padding / 2} ${width + padding} ${
-      height + padding
-    }`
-  );
-}
-
-function useSVGRef(params: UseGaugeParams) {
-  const { padding, size, startAngle, endAngle, numTicks } = params;
-  const ref = useRef<SVGSVGElement>(null!);
-
-  const setRef = useCallback(
-    (node: any) => {
-      if (ref.current) {
-      }
-
-      if (node) {
-        redrawSvg(node, {
-          padding,
-        });
-      }
-
-      ref.current = node;
-    },
-    [padding, size, startAngle, endAngle, numTicks]
-  );
-
-  return {
-    setRef,
-    svg: ref,
-  };
-}
-
 export function useGauge(params: UseGaugeParams) {
-  const { startAngle, endAngle, numTicks, size, domain, padding } = params;
-  const radius = size;
+  const { startAngle, endAngle, numTicks, diameter, domain } = params;
+  const radius = diameter / 2;
   const [minValue, maxValue] = domain;
-  const { setRef: ref, svg } = useSVGRef(params);
 
   const ticks = useMemo(() => {
     return makeTickMarks(startAngle, endAngle, numTicks).reverse();
@@ -90,11 +42,8 @@ export function useGauge(params: UseGaugeParams) {
 
   const getLabelProps = useCallback(
     (params: GetLabelPropsParams) => {
-      if (svg.current) {
-        redrawSvg(svg.current, { padding });
-      }
       const { angle, offset } = params;
-      const p1 = polarToCartesian(size / 2, size / 2, radius - offset, angle);
+      const p1 = polarToCartesian(0, 0, radius - offset, angle + 90);
 
       return {
         x: p1.x,
@@ -103,17 +52,14 @@ export function useGauge(params: UseGaugeParams) {
         textAnchor: 'middle',
       };
     },
-    [size, radius]
+    [diameter, radius]
   );
 
   const getTickProps = useCallback(
     (params: GetTickPropsParams) => {
-      if (svg.current) {
-        redrawSvg(svg.current, { padding });
-      }
       const { length, angle } = params;
-      const p1 = polarToCartesian(size / 2, size / 2, radius, angle);
-      const p2 = polarToCartesian(size / 2, size / 2, radius + length, angle);
+      const p1 = polarToCartesian(0, 0, radius, angle + 90);
+      const p2 = polarToCartesian(0, 0, radius + length, angle + 90);
 
       return {
         key: `tick-${angle}`,
@@ -123,7 +69,7 @@ export function useGauge(params: UseGaugeParams) {
         y2: p2.y,
       };
     },
-    [ticks, size, radius]
+    [ticks, diameter, radius]
   );
 
   const angleToValue = (angle: number) => {
@@ -144,35 +90,21 @@ export function useGauge(params: UseGaugeParams) {
     (params: GetArcPropsParams) => {
       const { offset = 0, startAngle, endAngle, ...rest } = params;
 
-      if (svg.current) {
-        redrawSvg(svg.current, { padding });
-      }
+      let start = polarToCartesian(0, 0, radius + offset, startAngle + 90);
+      let end = polarToCartesian(0, 0, radius + offset, endAngle + 90);
 
-      let start = polarToCartesian(
-        size / 2,
-        size / 2,
-        radius + offset,
-        endAngle
-      );
+      let largeArcFlag = endAngle - startAngle < 180 ? '0' : '1';
 
-      let end = polarToCartesian(
-        size / 2,
-        size / 2,
-        radius + offset,
-        startAngle
-      );
-
-      let largeArcFlag = endAngle - startAngle <= 180 ? '0' : '1';
       let d = [
         'M',
-        start.x,
+        start.x - 0.001,
         start.y,
         'A',
         radius + offset,
         radius + offset,
         0,
         largeArcFlag,
-        0,
+        1,
         end.x,
         end.y,
       ].join(' ');
@@ -182,28 +114,20 @@ export function useGauge(params: UseGaugeParams) {
         ...rest,
       };
     },
-    [size, radius]
+    [diameter, radius]
   );
 
   const getNeedleProps = useCallback(
     (params: GetNeedleParams) => {
-      if (svg.current) {
-        redrawSvg(svg.current, { padding });
-      }
       const { value, baseRadius, tipRadius } = params;
       const angle = valueToAngle(value);
 
       const baseCircleCenter = {
-        x: size / 2,
-        y: size / 2,
+        x: 0,
+        y: 0,
       };
 
-      const tipCircleCenter = polarToCartesian(
-        size / 2,
-        size / 2,
-        radius,
-        angle
-      );
+      const tipCircleCenter = polarToCartesian(0, 0, radius, angle + 90);
 
       return {
         base: {
@@ -218,36 +142,71 @@ export function useGauge(params: UseGaugeParams) {
         },
         points: [
           [
-            baseCircleCenter.x +
-              baseRadius * Math.cos(degreesToRadians(angle + 90)),
-            baseCircleCenter.y +
-              baseRadius * Math.sin(degreesToRadians(angle + 90)),
+            baseCircleCenter.x + baseRadius * Math.cos(degreesToRadians(angle)),
+            baseCircleCenter.y + baseRadius * Math.sin(degreesToRadians(angle)),
+          ],
+          [
+            tipCircleCenter.x + tipRadius * Math.cos(degreesToRadians(angle)),
+            tipCircleCenter.y + tipRadius * Math.sin(degreesToRadians(angle)),
           ],
           [
             tipCircleCenter.x +
-              tipRadius * Math.cos(degreesToRadians(angle + 90)),
+              tipRadius * Math.cos(degreesToRadians(angle - 180)),
             tipCircleCenter.y +
-              tipRadius * Math.sin(degreesToRadians(angle + 90)),
-          ],
-          [
-            tipCircleCenter.x +
-              tipRadius * Math.cos(degreesToRadians(angle - 90)),
-            tipCircleCenter.y +
-              tipRadius * Math.sin(degreesToRadians(angle - 90)),
+              tipRadius * Math.sin(degreesToRadians(angle - 180)),
           ],
           [
             baseCircleCenter.x +
-              baseRadius * Math.cos(degreesToRadians(angle - 90)),
+              baseRadius * Math.cos(degreesToRadians(angle - 180)),
             baseCircleCenter.y +
-              baseRadius * Math.sin(degreesToRadians(angle - 90)),
+              baseRadius * Math.sin(degreesToRadians(angle - 180)),
           ],
         ]
           .map(([x, y]) => `${x},${y}`)
           .join(' '),
       };
     },
-    [valueToAngle, size, radius]
+    [valueToAngle, diameter, radius]
   );
+
+  const calculatediameterForDirection = (startAngle: number, deg: number) => {
+    const angle = startAngle - deg;
+    const distance = (Math.cos(degreesToRadians(angle)) * diameter) / 2;
+    return distance;
+  };
+
+  const getGaugeSVGProps = () => {
+    const getDistanceForDirection = (deg: number) => {
+      if (startAngle < deg && endAngle > deg) return diameter / 2;
+      const startAngleDistance = calculatediameterForDirection(
+        startAngle + 90,
+        deg + 90
+      );
+      const endAngleDistance = calculatediameterForDirection(
+        endAngle + 90,
+        deg + 90
+      );
+      return Math.max(0, startAngleDistance, endAngleDistance);
+    };
+
+    const [top, right, bottom, left] = [
+      getDistanceForDirection(180), // top,
+      getDistanceForDirection(270), // right,
+      getDistanceForDirection(0), // bottom,
+      getDistanceForDirection(90), // left,
+    ];
+
+    const width = left + right;
+    const height = top + bottom;
+
+    const viewBox = [-left, -top, width, height].join(' ');
+
+    return {
+      width,
+      height,
+      viewBox,
+    };
+  };
 
   return {
     ticks,
@@ -257,6 +216,6 @@ export function useGauge(params: UseGaugeParams) {
     angleToValue,
     getArcProps,
     getNeedleProps,
-    ref,
+    getGaugeSVGProps,
   };
 }

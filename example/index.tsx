@@ -8,22 +8,20 @@ import { useControls } from 'leva';
 const App = () => {
   const {
     value,
-    size,
+    diameter,
     minValue,
     maxValue,
     startAngle,
     endAngle,
     numTicks,
-    padding,
   } = useControls('Gauge settings', {
-    size: { value: 200 },
+    diameter: { value: 200 },
     value: { value: 0, min: 0, max: 100 },
     minValue: { value: 0 },
     maxValue: { value: 100 },
-    startAngle: { value: 150, min: 0, max: 360, step: 1 },
-    endAngle: { value: 390, min: 0, max: 720, step: 1 },
+    startAngle: { value: 90, min: 0, max: 360, step: 1 },
+    endAngle: { value: 270, min: 0, max: 360, step: 1 },
     numTicks: { value: 11, min: 0, max: 30, step: 1 },
-    padding: { value: 0, min: 0, max: 100, step: 1 },
   });
 
   const {
@@ -84,7 +82,6 @@ const App = () => {
   });
 
   const {
-    ref,
     ticks,
     getTickProps,
     getLabelProps,
@@ -92,12 +89,12 @@ const App = () => {
     angleToValue,
     getArcProps,
     getNeedleProps,
+    getGaugeSVGProps,
   } = useGauge({
     startAngle,
     endAngle,
     numTicks,
-    size,
-    padding,
+    diameter,
     domain: [minValue, maxValue],
   });
 
@@ -110,7 +107,8 @@ const App = () => {
   return (
     <div className="h-screen flex items-center justify-center">
       <svg
-        ref={ref}
+        // ref={ref}
+        {...getGaugeSVGProps()}
         className="overflow-visible max-w-full border-2 border-gray-700"
       >
         <path
