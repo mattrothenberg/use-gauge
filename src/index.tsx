@@ -1,5 +1,4 @@
 import { useCallback, useMemo, useRef } from 'react';
-import scaleLinear from '@visx/scale/lib/scales/linear';
 import { degreesToRadians, makeTickMarks, polarToCartesian } from './lib';
 
 interface UseGaugeParams {
@@ -109,15 +108,19 @@ export function useGauge(params: UseGaugeParams) {
     [ticks, size, radius]
   );
 
-  const scale = useMemo(
-    () =>
-      scaleLinear({
-        domain: [ticks[0], ticks[ticks.length - 1]],
-        range: [minValue, maxValue],
-        round: true,
-      }),
-    [ticks, minValue, maxValue]
-  );
+  const angleToValue = (angle: number) => {
+    const angleRange = endAngle - startAngle;
+    const valueRange = maxValue - minValue;
+    const value = minValue + ((angle - startAngle) / angleRange) * valueRange;
+    return Math.round(value);
+  };
+
+  const valueToAngle = (value: number) => {
+    const angleRange = endAngle - startAngle;
+    const valueRange = maxValue - minValue;
+    const angle = startAngle + ((value - minValue) / valueRange) * angleRange;
+    return Math.round(angle);
+  };
 
   const getArcProps = useCallback(
     (params: GetArcPropsParams) => {
@@ -158,7 +161,7 @@ export function useGauge(params: UseGaugeParams) {
   const getNeedleProps = useCallback(
     (params: GetNeedleParams) => {
       const { value, baseRadius, tipRadius } = params;
-      const angle = scale.invert(value);
+      const angle = valueToAngle(value);
 
       const baseCircleCenter = {
         x: size / 2,
@@ -213,14 +216,15 @@ export function useGauge(params: UseGaugeParams) {
           .join(' '),
       };
     },
-    [scale, size, radius]
+    [valueToAngle, size, radius]
   );
 
   return {
     ticks,
     getTickProps,
     getLabelProps,
-    scale,
+    valueToAngle,
+    angleToValue,
     getArcProps,
     getNeedleProps,
     ref,
