@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useRef } from 'react';
-import { scaleLinear } from '@visx/scale';
+import scaleLinear from '@visx/scale/lib/scales/linear';
 import { degreesToRadians, makeTickMarks, polarToCartesian } from './lib';
 
 interface UseGaugeParams {
