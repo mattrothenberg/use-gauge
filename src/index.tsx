@@ -73,8 +73,9 @@ export function useGauge(params: UseGaugeParams) {
   const [minValue, maxValue] = domain;
   const ref = useSVGRef(params);
 
-  const tickMarkAngles = makeTickMarks(startAngle, endAngle, numTicks);
-  const ticks = tickMarkAngles.reverse();
+  const ticks = useMemo(() => {
+    return makeTickMarks(startAngle, endAngle, numTicks).reverse();
+  }, [startAngle, endAngle, numTicks]);
 
   const getLabelProps = useCallback(
     (params: GetLabelPropsParams) => {
