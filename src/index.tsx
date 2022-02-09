@@ -169,11 +169,14 @@ export function useGauge(params: UseGaugeParams) {
     [valueToAngle, diameter, radius]
   );
 
-  const calculatediameterForDirection = (startAngle: number, deg: number) => {
-    const angle = startAngle - deg;
-    const distance = (Math.cos(degreesToRadians(angle)) * diameter) / 2;
-    return distance;
-  };
+  const calculatediameterForDirection = useCallback(
+    (startAngle: number, deg: number) => {
+      const angle = startAngle - deg;
+      const distance = (Math.cos(degreesToRadians(angle)) * diameter) / 2;
+      return distance;
+    },
+    [diameter]
+  );
 
   const getGaugeSVGProps = () => {
     const getDistanceForDirection = (deg: number) => {
