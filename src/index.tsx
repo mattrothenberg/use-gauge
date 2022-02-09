@@ -119,81 +119,102 @@ export function useGauge(params: UseGaugeParams) {
     [ticks, minValue, maxValue]
   );
 
-  function getArcProps(params: GetArcPropsParams) {
-    const { offset = 0, startAngle, endAngle } = params;
-    let start = polarToCartesian(size / 2, size / 2, radius + offset, endAngle);
-    let end = polarToCartesian(size / 2, size / 2, radius + offset, startAngle);
-    let largeArcFlag = endAngle - startAngle <= 180 ? '0' : '1';
-    let d = [
-      'M',
-      start.x,
-      start.y,
-      'A',
-      radius + offset,
-      radius + offset,
-      0,
-      largeArcFlag,
-      0,
-      end.x,
-      end.y,
-    ].join(' ');
-    return {
-      d,
-    };
-  }
+  const getArcProps = useCallback(
+    (params: GetArcPropsParams) => {
+      const { offset = 0, startAngle, endAngle } = params;
+      let start = polarToCartesian(
+        size / 2,
+        size / 2,
+        radius + offset,
+        endAngle
+      );
+      let end = polarToCartesian(
+        size / 2,
+        size / 2,
+        radius + offset,
+        startAngle
+      );
+      let largeArcFlag = endAngle - startAngle <= 180 ? '0' : '1';
+      let d = [
+        'M',
+        start.x,
+        start.y,
+        'A',
+        radius + offset,
+        radius + offset,
+        0,
+        largeArcFlag,
+        0,
+        end.x,
+        end.y,
+      ].join(' ');
+      return {
+        d,
+      };
+    },
+    [size, radius]
+  );
 
-  const getNeedleProps = (params: GetNeedleParams) => {
-    const { value, baseRadius, tipRadius } = params;
-    const angle = scale.invert(value);
+  const getNeedleProps = useCallback(
+    (params: GetNeedleParams) => {
+      const { value, baseRadius, tipRadius } = params;
+      const angle = scale.invert(value);
 
-    const baseCircleCenter = {
-      x: size / 2,
-      y: size / 2,
-    };
+      const baseCircleCenter = {
+        x: size / 2,
+        y: size / 2,
+      };
 
-    const tipCircleCenter = polarToCartesian(size / 2, size / 2, radius, angle);
+      const tipCircleCenter = polarToCartesian(
+        size / 2,
+        size / 2,
+        radius,
+        angle
+      );
 
-    return {
-      base: {
-        r: baseRadius,
-        cx: baseCircleCenter.x,
-        cy: baseCircleCenter.y,
-      },
-      tip: {
-        r: tipRadius,
-        cx: tipCircleCenter.x,
-        cy: tipCircleCenter.y,
-      },
-      points: [
-        [
-          baseCircleCenter.x +
-            baseRadius * Math.cos(degreesToRadians(angle + 90)),
-          baseCircleCenter.y +
-            baseRadius * Math.sin(degreesToRadians(angle + 90)),
-        ],
-        [
-          tipCircleCenter.x +
-            tipRadius * Math.cos(degreesToRadians(angle + 90)),
-          tipCircleCenter.y +
-            tipRadius * Math.sin(degreesToRadians(angle + 90)),
-        ],
-        [
-          tipCircleCenter.x +
-            tipRadius * Math.cos(degreesToRadians(angle - 90)),
-          tipCircleCenter.y +
-            tipRadius * Math.sin(degreesToRadians(angle - 90)),
-        ],
-        [
-          baseCircleCenter.x +
-            baseRadius * Math.cos(degreesToRadians(angle - 90)),
-          baseCircleCenter.y +
-            baseRadius * Math.sin(degreesToRadians(angle - 90)),
-        ],
-      ]
-        .map(([x, y]) => `${x},${y}`)
-        .join(' '),
-    };
-  };
+      return {
+        base: {
+          r: baseRadius,
+          cx: baseCircleCenter.x,
+          cy: baseCircleCenter.y,
+        },
+        tip: {
+          r: tipRadius,
+          cx: tipCircleCenter.x,
+          cy: tipCircleCenter.y,
+        },
+        points: [
+          [
+            baseCircleCenter.x +
+              baseRadius * Math.cos(degreesToRadians(angle + 90)),
+            baseCircleCenter.y +
+              baseRadius * Math.sin(degreesToRadians(angle + 90)),
+          ],
+          [
+            tipCircleCenter.x +
+              tipRadius * Math.cos(degreesToRadians(angle + 90)),
+            tipCircleCenter.y +
+              tipRadius * Math.sin(degreesToRadians(angle + 90)),
+          ],
+          [
+            tipCircleCenter.x +
+              tipRadius * Math.cos(degreesToRadians(angle - 90)),
+            tipCircleCenter.y +
+              tipRadius * Math.sin(degreesToRadians(angle - 90)),
+          ],
+          [
+            baseCircleCenter.x +
+              baseRadius * Math.cos(degreesToRadians(angle - 90)),
+            baseCircleCenter.y +
+              baseRadius * Math.sin(degreesToRadians(angle - 90)),
+          ],
+        ]
+          .map(([x, y]) => `${x},${y}`)
+          .join(' '),
+      };
+    },
+    [scale, size, radius]
+  );
 
   return {
     ticks,
