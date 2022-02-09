@@ -1,15 +1,20 @@
 import { useCallback, useMemo, useRef } from 'react';
 import { scaleLinear } from '@visx/scale';
-import { makeTickMarks, polarToCartesian } from './lib';
+import { degreesToRadians, makeTickMarks, polarToCartesian } from './lib';
 
 interface UseGaugeParams {
-  // value: number;
   size: number;
   padding: number;
   startAngle: number;
   endAngle: number;
   numTicks: number;
   domain: [number, number];
+}
+
+interface GetNeedleParams {
+  value: number;
+  baseRadius: number;
+  tipRadius: number;
 }
 
 interface GetTickPropsParams {
@@ -136,12 +141,66 @@ export function useGauge(params: UseGaugeParams) {
     };
   }
 
+  const getNeedleProps = (params: GetNeedleParams) => {
+    const { value, baseRadius, tipRadius } = params;
+    const angle = scale.invert(value);
+
+    const baseCircleCenter = {
+      x: size / 2,
+      y: size / 2,
+    };
+
+    const tipCircleCenter = polarToCartesian(size / 2, size / 2, radius, angle);
+
+    return {
+      base: {
+        r: baseRadius,
+        cx: baseCircleCenter.x,
+        cy: baseCircleCenter.y,
+      },
+      tip: {
+        r: tipRadius,
+        cx: tipCircleCenter.x,
+        cy: tipCircleCenter.y,
+      },
+      points: [
+        [
+          baseCircleCenter.x +
+            baseRadius * Math.cos(degreesToRadians(angle + 90)),
+          baseCircleCenter.y +
+            baseRadius * Math.sin(degreesToRadians(angle + 90)),
+        ],
+        [
+          tipCircleCenter.x +
+            tipRadius * Math.cos(degreesToRadians(angle + 90)),
+          tipCircleCenter.y +
+            tipRadius * Math.sin(degreesToRadians(angle + 90)),
+        ],
+        [
+          tipCircleCenter.x +
+            tipRadius * Math.cos(degreesToRadians(angle - 90)),
+          tipCircleCenter.y +
+            tipRadius * Math.sin(degreesToRadians(angle - 90)),
+        ],
+        [
+          baseCircleCenter.x +
+            baseRadius * Math.cos(degreesToRadians(angle - 90)),
+          baseCircleCenter.y +
+            baseRadius * Math.sin(degreesToRadians(angle - 90)),
+        ],
+      ]
+        .map(([x, y]) => `${x},${y}`)
+        .join(' '),
+    };
+  };
+
   return {
     ticks,
     getTickProps,
     getLabelProps,
     scale,
     getArcProps,
+    getNeedleProps,
     ref,
   };
 }

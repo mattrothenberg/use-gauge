@@ -63,15 +63,48 @@ const App = () => {
     },
   });
 
-  const { ref, ticks, getTickProps, getLabelProps, scale, getArcProps } =
-    useGauge({
-      startAngle,
-      endAngle,
-      numTicks,
-      size,
-      padding,
-      domain: [minValue, maxValue],
-    });
+  const {
+    baseRadius,
+    tipRadius,
+    color: needleColor,
+  } = useControls('Needle Props', {
+    baseRadius: {
+      value: 12,
+      min: 0,
+      max: 50,
+    },
+    tipRadius: {
+      value: 2,
+      min: 0,
+      max: 50,
+    },
+    color: {
+      value: '#374151',
+    },
+  });
+
+  const {
+    ref,
+    ticks,
+    getTickProps,
+    getLabelProps,
+    scale,
+    getArcProps,
+    getNeedleProps,
+  } = useGauge({
+    startAngle,
+    endAngle,
+    numTicks,
+    size,
+    padding,
+    domain: [minValue, maxValue],
+  });
+
+  const { tip, base, points } = getNeedleProps({
+    value,
+    baseRadius,
+    tipRadius,
+  });
 
   return (
     <div className="h-screen flex items-center justify-center">
@@ -115,6 +148,13 @@ const App = () => {
               </React.Fragment>
             );
           })}
+        </g>
+        <g id="needle">
+          <circle className="fill-gray-300" {...base} r={24} />
+          <circle fill={needleColor} {...base} />
+          <circle fill={needleColor} {...tip} />
+          <polyline fill={needleColor} points={points} />
+          <circle className="fill-white" {...base} r={4} />
         </g>
       </svg>
     </div>
