@@ -18,14 +18,12 @@ yarn add use-gauge
 
 ## Usage
 
-
 🚨 Beware that this API is very much in flux! Breaking changes **will** occur, but I'll update these docs and the Codesandbox accordingly 🚨
 
 In your React project, import the `useGauge` hook and invoke it with the following parameters.
 
 ```tsx
 const {
-  ref,
   ticks,
   valueToAngle,
   angleToValue,
@@ -33,12 +31,12 @@ const {
   getLabelProps,
   getArcProps,
   getNeedleProps,
+  getSVGProps,
 } = useGauge({
   startAngle: 180, // determines where the gauge starts
   endAngle: 360, // determines where the gauge ends
   numTicks, // the number of ticks to display between the min and max values
-  size, // how large the chart should be (TODO: Investigate a better API)
-  padding, // Honestly kind of a misnomer, as it really just zooms the chart in and out. (TODO: Investigate a better API)
+  diameter, // diameter of the gauge itself
   domain: [minValue, maxValue], // Min and max values for your gauge. *Please* use a min that's smaller than the max :)
 });
 ```
@@ -47,12 +45,12 @@ If you want to skip ahead and see a fully baked implementation of this hook, che
 
 Otherwise, here's a brief explanation of how these returned values work.
 
-### ref
+### getSVGProps
 
-_Please_ be sure to apply this `ref` to your SVG component, as it's responsible for programatically updating the height, width, and viewBox of the element as a function of the `size` you provide. To be totally honest, I'm not in love with this API and really wish I could get rid of the `size` prop in earnest but this was the path of least resistance.
+_Please_ be sure to apply these props to your SVG element, as it's responsible for programatically updating the height, width, and viewBox of the element as a function of the `diameter` you provide.
 
 ```tsx
-<svg ref={ref}></svg>
+<svg {...getSVGProps()}></svg>
 ```
 
 ### ticks, getTickProps, getLabelProps, and angleToValue
