@@ -23,7 +23,7 @@ const App = () => {
     startAngle: { value: 150, min: 0, max: 360, step: 1 },
     endAngle: { value: 390, min: 0, max: 720, step: 1 },
     numTicks: { value: 11, min: 0, max: 30, step: 1 },
-    padding: { value: 24, min: 0, max: 100, step: 1 },
+    padding: { value: 0, min: 0, max: 100, step: 1 },
   });
 
   const {
@@ -109,14 +109,21 @@ const App = () => {
 
   return (
     <div className="h-screen flex items-center justify-center">
-      <svg ref={ref} className="max-w-full border-2 border-gray-700">
+      <svg
+        ref={ref}
+        className="overflow-visible max-w-full border-2 border-gray-700"
+      >
         <path
-          {...getArcProps({ offset, startAngle, endAngle })}
+          {...getArcProps({
+            offset,
+            startAngle,
+            endAngle,
+            strokeWidth: arcStrokeWidth,
+          })}
           fill="none"
           className="stroke-gray-100"
           // @ts-ignore
-          strokeLinecap={strokeLineCap}
-          strokeWidth={arcStrokeWidth}
+          // strokeLinecap={strokeLineCap}
         />
         {value > minValue && (
           <path
@@ -124,12 +131,12 @@ const App = () => {
               offset,
               startAngle,
               endAngle: valueToAngle(value),
+              strokeWidth: arcStrokeWidth,
             })}
             fill="none"
             stroke={progressColor}
             // @ts-ignore
-            strokeLinecap={strokeLineCap}
-            strokeWidth={arcStrokeWidth}
+            // strokeLinecap={strokeLineCap}
           />
         )}
         <g id="ticks">

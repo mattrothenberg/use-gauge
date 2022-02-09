@@ -26,7 +26,7 @@ interface GetLabelPropsParams {
   offset: number;
 }
 
-interface GetArcPropsParams {
+interface GetArcPropsParams extends React.SVGProps<SVGPathElement> {
   offset?: number;
   startAngle: number;
   endAngle: number;
@@ -38,7 +38,7 @@ interface RedrawSVGParams {
 
 function redrawSvg(node: SVGSVGElement, params: RedrawSVGParams) {
   const { padding } = params;
-  const bbox = node.getBBox();
+  const bbox = node.getBBox({ stroke: true });
   const width = bbox.width;
   const height = bbox.height;
 
@@ -142,39 +142,47 @@ export function useGauge(params: UseGaugeParams) {
 
   const getArcProps = useCallback(
     (params: GetArcPropsParams) => {
+      const { offset = 0, startAngle, endAngle, strokeWidth, ...rest } = params;
+
+      let stroke = parseInt(String(strokeWidth));
+
       if (svg.current) {
         redrawSvg(svg.current, { padding });
       }
 
-      const { offset = 0, startAngle, endAngle } = params;
       let start = polarToCartesian(
         size / 2,
         size / 2,
-        radius + offset,
+        radius + offset + stroke,
         endAngle
       );
+
       let end = polarToCartesian(
         size / 2,
         size / 2,
-        radius + offset,
+        radius + offset + stroke,
         startAngle
       );
+
       let largeArcFlag = endAngle - startAngle <= 180 ? '0' : '1';
       let d = [
         'M',
         start.x,
         start.y,
         'A',
-        radius + offset,
-        radius + offset,
+        radius + offset + stroke,
+        radius + offset + stroke,
         0,
         largeArcFlag,
         0,
         end.x,
         end.y,
       ].join(' ');
+
       return {
         d,
+        strokeWidth,
+        ...rest,
       };
     },
     [size, radius]
