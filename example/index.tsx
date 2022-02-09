@@ -109,7 +109,7 @@ const App = () => {
 
   return (
     <div className="h-screen flex items-center justify-center">
-      <svg ref={ref} className="max-w-full">
+      <svg ref={ref} className="max-w-full border-2 border-gray-700">
         <path
           {...getArcProps({ offset, startAngle, endAngle })}
           fill="none"
