@@ -190,10 +190,10 @@ export function useGauge(params: UseGaugeParams) {
     };
 
     const [top, right, bottom, left] = [
-      getDistanceForDirection(180), // top,
-      getDistanceForDirection(270), // right,
-      getDistanceForDirection(0), // bottom,
-      getDistanceForDirection(90), // left,
+      getDistanceForDirection(180),
+      getDistanceForDirection(270),
+      getDistanceForDirection(0),
+      getDistanceForDirection(90),
     ];
 
     const width = left + right;

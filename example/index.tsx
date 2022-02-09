@@ -15,7 +15,7 @@ const App = () => {
     endAngle,
     numTicks,
   } = useControls('Gauge settings', {
-    diameter: { value: 200 },
+    diameter: { value: 300 },
     value: { value: 0, min: 0, max: 100 },
     minValue: { value: 0 },
     maxValue: { value: 100 },
@@ -106,11 +106,7 @@ const App = () => {
 
   return (
     <div className="h-screen flex items-center justify-center">
-      <svg
-        // ref={ref}
-        {...getGaugeSVGProps()}
-        className="overflow-visible max-w-full border-2 border-gray-700"
-      >
+      <svg {...getGaugeSVGProps()} className="max-w-full overflow-visible">
         <path
           {...getArcProps({
             offset,
