@@ -33,8 +33,8 @@ const {
   getNeedleProps,
   getSVGProps,
 } = useGauge({
-  startAngle: 180, // determines where the gauge starts
-  endAngle: 360, // determines where the gauge ends
+  startAngle: 90, // The bottom of the gauge is considered 90 degrees, so this means 90 degrees FROM 90, so 180.
+  endAngle: 270, // And this means 270 degrees FROM 90, so 360.
   numTicks, // the number of ticks to display between the min and max values
   diameter, // diameter of the gauge itself
   domain: [minValue, maxValue], // Min and max values for your gauge. *Please* use a min that's smaller than the max :)
