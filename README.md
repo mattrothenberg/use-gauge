@@ -93,7 +93,7 @@ You can calculate progress in this scenario by converting your numerical value t
 ```tsx
 // Background
 <path
-  {...getArcProps({ offset, startAngle: 180, endAngle: 360 })}
+  {...getArcProps({ offset, startAngle: 90, endAngle: 270 })}
   className="stroke-gray-100"
   strokeLinecap="round"
   strokeWidth={24}
