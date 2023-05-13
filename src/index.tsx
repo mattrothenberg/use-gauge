@@ -13,6 +13,7 @@ interface GetNeedleParams {
   value: number;
   baseRadius: number;
   tipRadius: number;
+  offset?: number;
 }
 
 interface GetTickPropsParams {
@@ -119,7 +120,7 @@ export function useGauge(params: UseGaugeParams) {
 
   const getNeedleProps = useCallback(
     (params: GetNeedleParams) => {
-      const { value, baseRadius, tipRadius } = params;
+      const { value, baseRadius, tipRadius, offset = 0 } = params;
       const angle = valueToAngle(value);
 
       const baseCircleCenter = {
@@ -127,7 +128,12 @@ export function useGauge(params: UseGaugeParams) {
         y: 0,
       };
 
-      const tipCircleCenter = polarToCartesian(0, 0, radius, angle + 90);
+      const tipCircleCenter = polarToCartesian(
+        0,
+        0,
+        radius - offset,
+        angle + 90
+      );
 
       return {
         base: {
