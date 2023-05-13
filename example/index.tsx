@@ -65,6 +65,7 @@ const App = () => {
     baseRadius,
     tipRadius,
     color: needleColor,
+    offset: needleOffset,
   } = useControls('Needle Props', {
     baseRadius: {
       value: 12,
@@ -78,6 +79,11 @@ const App = () => {
     },
     color: {
       value: '#374151',
+    },
+    offset: {
+      value: 35,
+      min: 0,
+      max: 50,
     },
   });
 
@@ -102,6 +108,7 @@ const App = () => {
     value,
     baseRadius,
     tipRadius,
+    offset: needleOffset,
   });
 
   return (
