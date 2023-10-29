@@ -63,7 +63,6 @@ export function useGauge(params: UseGaugeParams) {
       const p2 = polarToCartesian(0, 0, radius + length, angle + 90);
 
       return {
-        key: `tick-${angle}`,
         x1: p1.x,
         x2: p2.x,
         y1: p1.y,
